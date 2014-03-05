@@ -27,8 +27,8 @@ func (t *HesitantTicker) Stop() {
 // dropped if a slow receiver is unable to keep up with the rate of ticks.
 func NewHesitantTicker(d time.Duration) *HesitantTicker {
 	ticker := &HesitantTicker{
-		nil,
 		make(chan time.Time, 1),
+		nil,
 		make(chan struct{}),
 	}
 
@@ -38,11 +38,11 @@ func NewHesitantTicker(d time.Duration) *HesitantTicker {
 
 		t.ticker = time.NewTicker(d)
 		for {
-			last = <-t.Ticker.C
+			last = <-t.ticker.C
 
 			select {
 			case <-t.stop:
-				t.Ticker.Stop()
+				t.ticker.Stop()
 				return
 			case t.C <- last:
 			default:
