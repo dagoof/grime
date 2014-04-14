@@ -5,18 +5,36 @@ import (
 	"time"
 )
 
-func ExampleHesitantTicker() {
-	d := time.Millisecond * 100
+func ExampleHesitantStepper() {
+	D := time.Millisecond * 50
 
-	t := NewHesitantTicker(d)
-	now := time.Now().Add(d).Truncate(d)
+	now := time.Now().Truncate(D)
+	t := NewTicker(NewHesitantStepper(D))
 	defer t.Stop()
 
-	fmt.Println((<-t.C).Truncate(d).Sub(now))
-	fmt.Println((<-t.C).Truncate(d).Sub(now))
-	fmt.Println((<-t.C).Truncate(d).Sub(now))
+	fmt.Println((<-t.C).Sub(now))
+	fmt.Println((<-t.C).Sub(now))
+	fmt.Println((<-t.C).Sub(now))
+	// Output:
+	// 50ms
+	// 100ms
+	// 150ms
+}
+
+func ExampleHesitantTicker_slowReceiver() {
+	D := time.Millisecond * 100
+
+	now := time.Now().Truncate(D)
+	t := NewTicker(NewHesitantStepper(D))
+	defer t.Stop()
+
+	fmt.Println((<-t.C).Sub(now))
+	time.Sleep(D * 2)
+
+	fmt.Println((<-t.C).Sub(now))
+	fmt.Println((<-t.C).Sub(now))
 	// Output:
 	// 100ms
 	// 200ms
-	// 300ms
+	// 400ms
 }

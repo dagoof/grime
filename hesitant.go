@@ -1,62 +1,36 @@
-// Package grime extends package time with some useful variations of
-// standard types.
 package grime
 
 import (
 	"time"
 )
 
-// HesitantTicker holds a channel that delivers ticks along an interval, but
+// HesitantStepper delivers steps at an interval, but
 // also aligned along that interval. The behaviour is such that a
-// HesitantTicker of duration 5s will deliver every 5s starting 
+// HesitantStepper of duration 5s will deliver every 5s starting
 // at 0s into every minute - continuing at 5s, 10s, 15s, and so on.
-type HesitantTicker struct {
-	C    chan time.Time
-	ticker *time.Ticker
-	stop chan struct{}
+type HesitantStepper struct {
+	D     time.Duration
+	Start time.Time
+	tick  time.Time
 }
 
-// Turn off the ticker. Does not close the channel, but prevents further ticks
-// from being sent.
-func (t *HesitantTicker) Stop() {
-	close(t.stop)
-}
-
-// NewHesitantTicker returns a new HesitantTicker containing a channel that will
-// send the time with a period specified by the duration argument. Ticks are
-// dropped if a slow receiver is unable to keep up with the rate of ticks.
-func NewHesitantTicker(d time.Duration) *HesitantTicker {
-	ticker := &HesitantTicker{
-		make(chan time.Time, 1),
-		nil,
-		make(chan struct{}),
+// Step forward according to the initialzed duration.
+func (t *HesitantStepper) Step() time.Time {
+	if t.tick.IsZero() {
+		if t.Start.IsZero() {
+			t.tick = time.Now().Truncate(t.D)
+		} else {
+			t.tick = t.Start.Truncate(t.D)
+		}
 	}
 
-	go func(t *HesitantTicker) {
-		var last time.Time
-		time.Sleep(time.Now().Add(d).Truncate(d).Sub(time.Now()))
-
-		t.ticker = time.NewTicker(d)
-		for {
-			last = <-t.ticker.C
-
-			select {
-			case <-t.stop:
-				t.ticker.Stop()
-				return
-			case t.C <- last:
-			default:
-			}
-		}
-	}(ticker)
-
-	return ticker
+	t.tick = t.tick.Add(t.D)
+	time.Sleep(t.tick.Sub(time.Now()))
+	return t.tick
 }
 
-// HesitantTick is a convenience wrapper for NewHesitantTicker providing access
-// to the ticking channel only. Useful for clients that have no need to shut
-// down the channel.
-// Analagous to time.Tick.
-func HesitantTick(d time.Duration) <-chan time.Time {
-	return NewHesitantTicker(d).C
+// NewHesitantStepper creates a new HesitantStepper with no start time
+// specified.
+func NewHesitantStepper(D time.Duration) *HesitantStepper {
+	return &HesitantStepper{D: D}
 }
