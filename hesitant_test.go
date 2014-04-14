@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func ExampleHesitantStepper() {
+func ExampleStepper_hesitant() {
 	D := time.Millisecond * 50
 
 	now := time.Now().Truncate(D)
@@ -21,7 +21,7 @@ func ExampleHesitantStepper() {
 	// 150ms
 }
 
-func ExampleHesitantStepper_slowReceiver() {
+func ExampleStepper_slowReceiver() {
 	D := time.Millisecond * 100
 
 	now := time.Now().Truncate(D)
