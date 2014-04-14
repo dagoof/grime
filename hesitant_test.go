@@ -21,7 +21,7 @@ func ExampleHesitantStepper() {
 	// 150ms
 }
 
-func ExampleHesitantTicker_slowReceiver() {
+func ExampleHesitantStepper_slowReceiver() {
 	D := time.Millisecond * 100
 
 	now := time.Now().Truncate(D)
