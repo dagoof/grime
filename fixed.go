@@ -8,6 +8,7 @@ import (
 // or future based on an optional Start offset.
 type FixedStepper struct {
 	D     time.Duration
+	Grace time.Duration
 	Start time.Time
 	tick  time.Time
 }
@@ -23,7 +24,13 @@ func (t *FixedStepper) Step() time.Time {
 	}
 
 	t.tick = t.tick.Add(t.D)
-	time.Sleep(t.tick.Sub(time.Now()))
+
+	pause := t.tick.Sub(time.Now())
+	if t.Grace > pause {
+		pause = t.Grace
+	}
+
+	time.Sleep(pause)
 	return t.tick
 }
 
