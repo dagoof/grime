@@ -31,7 +31,7 @@ func ExampleFixedStepper() {
 	)
 
 	stepper := NewFixedStepper(D)
-	stepper.Start = now
+	stepper.Start(now)
 
 	ticker := Tick(stepper)
 
@@ -53,10 +53,9 @@ func ExampleFixedStepper_startPast() {
 
 	D := time.Millisecond * 100
 	stepper := NewFixedStepper(D)
-	stepper.Start = start
-	stepper.Grace = D / 4
+	stepper.Start(start)
 
-	ticker := Tick(stepper)
+	ticker := BlockingTick(stepper)
 
 	fmt.Println((<-ticker).Format(time.StampMilli))
 	fmt.Println((<-ticker).Format(time.StampMilli))

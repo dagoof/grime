@@ -7,31 +7,26 @@ import (
 // FixedStepper delivers steps at an interval. Can potentially start in the past
 // or future based on an optional Start offset.
 type FixedStepper struct {
-	D     time.Duration
-	Grace time.Duration
-	Start time.Time
-	tick  time.Time
+	D    time.Duration
+	tick time.Time
+}
+
+// Start sets the tick of the ticker if the stepper has not yet been started
+func (s *FixedStepper) Start(t time.Time) {
+	if s.tick.IsZero() {
+		s.tick = t
+	}
 }
 
 // Step forward according to duration.
-func (t *FixedStepper) Step() time.Time {
-	if t.tick.IsZero() {
-		if t.Start.IsZero() {
-			t.tick = time.Now().Add(-t.D)
-		} else {
-			t.tick = t.Start
-		}
+func (s *FixedStepper) Step() time.Time {
+	if s.tick.IsZero() {
+		s.tick = time.Now().Add(-s.D)
 	}
 
-	t.tick = t.tick.Add(t.D)
-
-	pause := t.tick.Sub(time.Now())
-	if t.Grace > pause {
-		pause = t.Grace
-	}
-
-	time.Sleep(pause)
-	return t.tick
+	s.tick = s.tick.Add(s.D)
+	time.Sleep(s.tick.Sub(time.Now()))
+	return s.tick
 }
 
 // NewFixedStepper creates a new FixedStepper with no start time specified.
