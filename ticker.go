@@ -1,5 +1,5 @@
-// Package grime extends package time with some useful variations of
-// standard types.
+// Package grime extends package time with more flexible tickers based on the
+// concept of a stepper. Steppers control when ticks are generated.
 package grime
 
 import (
